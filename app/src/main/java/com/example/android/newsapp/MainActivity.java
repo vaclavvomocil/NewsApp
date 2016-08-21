@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +19,10 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import android.content.Loader;
 
 
@@ -28,6 +33,8 @@ public class MainActivity extends AppCompatActivity implements android.app.Loade
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final int NEWS_LOADER_ID = 1;
     private NewsAdapter adapter;
+    private ScheduledExecutorService scheduleTaskExecutor;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +47,9 @@ public class MainActivity extends AppCompatActivity implements android.app.Loade
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.registerOnSharedPreferenceChangeListener(this);
+
+        scheduleTaskExecutor = Executors.newScheduledThreadPool(5);
+
 
         newsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -54,11 +64,28 @@ public class MainActivity extends AppCompatActivity implements android.app.Loade
             }
         });
 
+        runLoadManager();
+
+        scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
+            public void run() {
+
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        runLoadManager();
+                        Log.v(LOG_TAG,"scheduler running");
+                    }
+                });
+            }
+        }, 0, 30, TimeUnit.SECONDS);
+
+    }
+
+    private void runLoadManager() {
         if (isNetworkAvailable() == false) {
-            Toast.makeText(getApplicationContext(),"network not available",Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "network not available", Toast.LENGTH_LONG).show();
         } else {
             android.app.LoaderManager loaderManager = getLoaderManager();
-            loaderManager.initLoader(NEWS_LOADER_ID,null,this);
+            loaderManager.initLoader(NEWS_LOADER_ID, null, this);
         }
     }
 
@@ -79,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements android.app.Loade
         Uri baseUri = Uri.parse(book_url);
         Uri.Builder uriBuilder = baseUri.buildUpon();
 
-
+        uriBuilder.appendQueryParameter("show-tags", "contributor");
         uriBuilder.appendQueryParameter("q", defaultTopic);
         uriBuilder.appendQueryParameter("api-key", "test");
 
@@ -116,17 +143,30 @@ public class MainActivity extends AppCompatActivity implements android.app.Loade
             startActivity(settingsIntent);
             return true;
         }
+        if (id == R.id.menu_refresh) {
+            adapter.clear();
+            getLoaderManager().restartLoader(NEWS_LOADER_ID, null, this);
+        }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-        if (key.equals(getString(R.string.settings_default_topic_key))){
+        if (key.equals(getString(R.string.settings_default_topic_key))) {
             adapter.clear();
 
-            getLoaderManager().restartLoader(NEWS_LOADER_ID, null, this);
+            if (isNetworkAvailable() == false) {
+                Toast.makeText(getApplicationContext(), "network not available", Toast.LENGTH_LONG).show();
+            } else {
+                getLoaderManager().restartLoader(NEWS_LOADER_ID, null, this);
+            }
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        scheduleTaskExecutor.shutdown();
+    }
 
 }
