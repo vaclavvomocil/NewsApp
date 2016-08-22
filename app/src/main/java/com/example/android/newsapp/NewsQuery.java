@@ -137,8 +137,28 @@ public class NewsQuery {
                     String title = news.getString("webTitle");
                     String url = news.getString("webUrl");
 
+                    JSONArray tagsArray = new JSONArray();
+                    String author = "";
+                    try {
+                        tagsArray = news.getJSONArray("tags");
+                    } catch (JSONException e) {
+                        Log.e(LOG_TAG, "no tags", e);
+                        author = "no author";
+                    }
 
-                    News newsTemp = new News(section, title, url);
+
+                    if (tagsArray.length() > 0) {
+                        StringBuilder outputAuthor = new StringBuilder();
+                        for (int j = 0; j < tagsArray.length(); j++) {
+                            JSONObject auth = tagsArray.getJSONObject(j);
+                            outputAuthor.append(auth.getString("webTitle"));
+                            outputAuthor.append(" ");
+                        }
+                        author = outputAuthor.toString();
+                    }
+
+
+                    News newsTemp = new News(section, title, url, author);
                     newses.add(newsTemp);
                 }
                 return newses;

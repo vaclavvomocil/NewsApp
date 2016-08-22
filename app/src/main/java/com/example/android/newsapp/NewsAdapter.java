@@ -10,7 +10,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 
-
 public class NewsAdapter extends ArrayAdapter<News> {
 
     public NewsAdapter(Context context, ArrayList<News> earth) {
@@ -19,30 +18,39 @@ public class NewsAdapter extends ArrayAdapter<News> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        ViewHolder holder;
         View listItemView = convertView;
         if (listItemView == null) {
             listItemView = LayoutInflater.from(getContext()).inflate(
                     R.layout.list_item, parent, false);
+            holder = new ViewHolder();
+            holder.sectionTextView = (TextView) listItemView.findViewById(R.id.section);
+            holder.titleTextView = (TextView) listItemView.findViewById(R.id.title);
+            holder.authorTextView = (TextView) listItemView.findViewById(R.id.author);
+            listItemView.setTag(holder);
+        } else {
+            holder = (ViewHolder) listItemView.getTag();
         }
 
         News currentListItem = getItem(position);
 
-        TextView sectionTextView = (TextView) listItemView.findViewById(R.id.section);
         String section = currentListItem.getSection();
-        sectionTextView.setText(section);
+        holder.sectionTextView.setText(section);
 
-        TextView titleTextView = (TextView) listItemView.findViewById(R.id.title);
         String title = currentListItem.getTitle();
-        titleTextView.setText(title);
+        holder.titleTextView.setText(title);
 
-
+        String author = currentListItem.getAuthor();
+        holder.authorTextView.setText(author);
 
         return listItemView;
-
-
-
     }
 
+    static class ViewHolder {
+        private TextView sectionTextView;
+        private TextView titleTextView;
+        private TextView authorTextView;
+    }
 
 }
 
