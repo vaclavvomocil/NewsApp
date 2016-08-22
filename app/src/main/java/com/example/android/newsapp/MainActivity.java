@@ -85,7 +85,11 @@ public class MainActivity extends AppCompatActivity implements android.app.Loade
             Toast.makeText(getApplicationContext(), "network not available", Toast.LENGTH_LONG).show();
         } else {
             android.app.LoaderManager loaderManager = getLoaderManager();
-            loaderManager.initLoader(NEWS_LOADER_ID, null, this);
+            if (loaderManager.getLoader(NEWS_LOADER_ID) == null) {
+                loaderManager.initLoader(NEWS_LOADER_ID, null, this);
+            } else {
+                loaderManager.restartLoader(NEWS_LOADER_ID, null, this);
+            }
         }
     }
 
