@@ -3,10 +3,11 @@
     <string name="search_button">search</string>
     <string name="edit_text_hint">enter book name</string>
     <string name="no_author">no author</string>
-    <string name="settings_menu_item">Settings</string>
+    <string name="settings_menu_item">settings</string>
     <string name="settings_title">News Settings</string>
     <string name="settings_default_topic">Default topic</string>
     <string name="settings_default_topic_key" translatable="false">q</string>
     <string name="settings_default_topic_value" translatable="false">debates</string>
+    <string name="menu_refresh" translatable="false">refresh</string>
 </resources>
 

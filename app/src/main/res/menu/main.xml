@@ -4,8 +4,9 @@
     tools:context="com.example.android.news.NewsSettings">
     <item
         android:id="@+id/action_settings"
-        android:title="@string/settings_menu_item"
-        android:icon="@drawable/settings"
-        android:orderInCategory="1"
-        app:showAsAction="ifRoom" />
+        android:title="@string/settings_menu_item" />
+
+    <item
+        android:id="@+id/menu_refresh"
+        android:title="@string/menu_refresh" />
 </menu>
